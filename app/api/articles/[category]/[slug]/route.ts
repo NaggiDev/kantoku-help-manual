@@ -11,7 +11,7 @@ interface RouteParams {
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { searchParams } = new URL(request.url);
-    const locale = searchParams.get('locale') || 'en';
+    const locale = searchParams.get('locale') || 'ja';
     
     const resolvedParams = await params;
     const article = await getArticleData(resolvedParams.category, resolvedParams.slug, locale);

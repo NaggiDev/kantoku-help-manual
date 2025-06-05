@@ -24,18 +24,23 @@ const messages = {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('en');
+  const [locale, setLocaleState] = useState<Locale>('ja');
+  const [isHydrated, setIsHydrated] = useState(false);
 
   // Load saved language preference on mount
   useEffect(() => {
+    setIsHydrated(true);
     const savedLocale = localStorage.getItem('kantoku-locale') as Locale;
     if (savedLocale && ['en', 'ja', 'vi'].includes(savedLocale)) {
       setLocaleState(savedLocale);
     } else {
-      // Detect browser language
+      // Detect browser language, default to Japanese
       const browserLang = navigator.language.split('-')[0];
-      if (['ja', 'vi'].includes(browserLang)) {
+      if (['en', 'vi'].includes(browserLang)) {
         setLocaleState(browserLang as Locale);
+      } else {
+        // Default to Japanese for any other language
+        setLocaleState('ja');
       }
     }
   }, []);
@@ -73,18 +78,18 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       if (typeof value === 'string') return value;
     }
     
-    // Fallback to English if translation not found
-    if (locale !== 'en') {
-      const englishMessages = messages.en;
+    // Fallback to Japanese if translation not found
+    if (locale !== 'ja') {
+      const japaneseMessages = messages.ja;
       if (section) {
-        const sectionMessages = englishMessages[section as keyof typeof englishMessages];
+        const sectionMessages = japaneseMessages[section as keyof typeof japaneseMessages];
         if (sectionMessages && typeof sectionMessages === 'object') {
           const value = sectionMessages[key as keyof typeof sectionMessages];
           if (typeof value === 'string') return value;
         }
       } else {
         const keys = key.split('.');
-        let value: any = englishMessages;
+        let value: any = japaneseMessages;
         
         for (const k of keys) {
           if (value && typeof value === 'object' && k in value) {
@@ -105,7 +110,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <LanguageContext.Provider value={{ locale, setLocale, t }}>
-      {children}
+      {isHydrated ? children : <div style={{ visibility: 'hidden' }}>{children}</div>}
     </LanguageContext.Provider>
   );
 }

@@ -22,15 +22,25 @@ export interface Article extends ArticleData {
   category: string;
 }
 
-export function getSortedArticlesData(locale: string = 'en'): ArticleData[] {
+export function getSortedArticlesData(locale: string = 'ja'): ArticleData[] {
   // Get file names under /content, including subdirectories for categories
   const localeContentDirectory = path.join(contentDirectory, locale);
+  const japaneseContentDirectory = path.join(contentDirectory, 'ja');
+  const englishContentDirectory = path.join(contentDirectory, 'en');
 
-  // Fallback to English if locale directory doesn't exist
-  const targetDirectory = fs.existsSync(localeContentDirectory) ? localeContentDirectory : contentDirectory;
+  // Fallback hierarchy: requested locale → Japanese → English
+  let targetDirectory = englishContentDirectory; // Final fallback to English
+  if (fs.existsSync(localeContentDirectory)) {
+    targetDirectory = localeContentDirectory;
+  } else if (fs.existsSync(japaneseContentDirectory)) {
+    targetDirectory = japaneseContentDirectory;
+  }
 
   const categories = fs.readdirSync(targetDirectory);
   let allArticles: ArticleData[] = [];
+
+  // Define category order for consistent sorting across languages
+  const categoryOrder = ['getting-started', 'features', 'advanced', 'troubleshooting'];
 
   categories.forEach(category => {
     const categoryPath = path.join(targetDirectory, category);
@@ -48,28 +58,58 @@ export function getSortedArticlesData(locale: string = 'en'): ArticleData[] {
           ...(matterResult.data as { title: string; description?: string; order?: number }),
         };
       });
+
+      // Sort articles within each category by order, then by title
+      categoryArticles.sort((a, b) => {
+        if (a.order !== undefined && b.order !== undefined) {
+          if (a.order < b.order) return -1;
+          if (a.order > b.order) return 1;
+        }
+        if (a.order !== undefined && b.order === undefined) return -1;
+        if (a.order === undefined && b.order !== undefined) return 1;
+        return a.title.localeCompare(b.title);
+      });
+
       allArticles = allArticles.concat(categoryArticles);
     }
   });
 
-  // Sort articles by order, then by title
+  // Sort articles by category order first, then maintain article order within categories
   return allArticles.sort((a, b) => {
+    const aCategoryIndex = categoryOrder.indexOf(a.category);
+    const bCategoryIndex = categoryOrder.indexOf(b.category);
+
+    // If categories are different, sort by category order
+    if (aCategoryIndex !== bCategoryIndex) {
+      return aCategoryIndex - bCategoryIndex;
+    }
+
+    // If same category, sort by order within category
     if (a.order !== undefined && b.order !== undefined) {
       if (a.order < b.order) return -1;
       if (a.order > b.order) return 1;
     }
-    if (a.order !== undefined && b.order === undefined) return -1; // a has order, b doesn't, so a comes first
-    if (a.order === undefined && b.order !== undefined) return 1;  // b has order, a doesn't, so b comes first
-
-    // If order is the same or not defined for both, sort by title
+    if (a.order !== undefined && b.order === undefined) return -1;
+    if (a.order === undefined && b.order !== undefined) return 1;
     return a.title.localeCompare(b.title);
   });
 }
 
-export async function getArticleData(category: string, id: string, locale: string = 'en'): Promise<Article> {
-  // For now, we'll use the default content directory
-  // In the future, this can be enhanced to support locale-specific content
-  const fullPath = path.join(contentDirectory, category, `${id}.md`);
+export async function getArticleData(category: string, id: string, locale: string = 'ja'): Promise<Article> {
+  // Try locale-specific content first, fallback to Japanese, then English
+  const localeContentDirectory = path.join(contentDirectory, locale);
+  const japaneseContentDirectory = path.join(contentDirectory, 'ja');
+  const englishContentDirectory = path.join(contentDirectory, 'en');
+  const localePath = path.join(localeContentDirectory, category, `${id}.md`);
+  const japanesePath = path.join(japaneseContentDirectory, category, `${id}.md`);
+  const englishPath = path.join(englishContentDirectory, category, `${id}.md`);
+
+  let fullPath = englishPath; // Final fallback to English
+  if (fs.existsSync(localePath)) {
+    fullPath = localePath;
+  } else if (fs.existsSync(japanesePath)) {
+    fullPath = japanesePath;
+  }
   const fileContents = fs.readFileSync(fullPath, 'utf8');
 
   // Use gray-matter to parse the post metadata section

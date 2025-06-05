@@ -4,7 +4,7 @@ import { getSortedArticlesData } from '@/lib/markdownProcessor';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const locale = searchParams.get('locale') || 'en';
+    const locale = searchParams.get('locale') || 'ja';
     
     const articles = getSortedArticlesData(locale);
     
