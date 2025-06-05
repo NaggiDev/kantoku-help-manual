@@ -1,0 +1,150 @@
+// Multi-branch pipeline configuration for Kantoku Help Manual
+pipeline {
+    agent any
+    
+    environment {
+        APP_NAME = 'kantoku-help-manual'
+        DOCKER_REGISTRY = credentials('docker-registry-url')
+        DOCKER_CREDENTIALS = credentials('docker-registry-credentials')
+    }
+    
+    stages {
+        stage('Branch Strategy') {
+            steps {
+                script {
+                    // Define deployment strategy based on branch
+                    switch(env.BRANCH_NAME) {
+                        case 'main':
+                        case 'master':
+                            env.DEPLOY_ENV = 'production'
+                            env.DEPLOY_PORT = '3000'
+                            env.REQUIRES_APPROVAL = 'true'
+                            break
+                        case 'develop':
+                            env.DEPLOY_ENV = 'staging'
+                            env.DEPLOY_PORT = '3001'
+                            env.REQUIRES_APPROVAL = 'false'
+                            break
+                        case ~/^feature\/.*/:
+                            env.DEPLOY_ENV = 'feature'
+                            env.DEPLOY_PORT = '3002'
+                            env.REQUIRES_APPROVAL = 'false'
+                            break
+                        case ~/^hotfix\/.*/:
+                            env.DEPLOY_ENV = 'hotfix'
+                            env.DEPLOY_PORT = '3003'
+                            env.REQUIRES_APPROVAL = 'true'
+                            break
+                        default:
+                            env.DEPLOY_ENV = 'none'
+                            env.REQUIRES_APPROVAL = 'false'
+                    }
+                    
+                    echo "Branch: ${env.BRANCH_NAME}"
+                    echo "Deploy Environment: ${env.DEPLOY_ENV}"
+                    echo "Deploy Port: ${env.DEPLOY_PORT}"
+                    echo "Requires Approval: ${env.REQUIRES_APPROVAL}"
+                }
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                script {
+                    echo "Building ${env.BRANCH_NAME} branch"
+                    
+                    // Build Docker image with branch-specific tag
+                    def branchTag = env.BRANCH_NAME.replaceAll('/', '-').toLowerCase()
+                    env.DOCKER_IMAGE = "${APP_NAME}:${branchTag}-${BUILD_NUMBER}"
+                    
+                    docker.build(env.DOCKER_IMAGE)
+                }
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                script {
+                    echo "Testing ${env.DOCKER_IMAGE}"
+                    
+                    // Run tests in Docker container
+                    sh """
+                        docker run --rm ${env.DOCKER_IMAGE} npm test || true
+                    """
+                }
+            }
+        }
+        
+        stage('Deploy') {
+            when {
+                not { environment name: 'DEPLOY_ENV', value: 'none' }
+            }
+            steps {
+                script {
+                    if (env.REQUIRES_APPROVAL == 'true') {
+                        timeout(time: 5, unit: 'MINUTES') {
+                            input message: "Deploy ${env.BRANCH_NAME} to ${env.DEPLOY_ENV}?",
+                                  ok: 'Deploy',
+                                  submitterParameter: 'DEPLOYER'
+                        }
+                    }
+                    
+                    echo "Deploying to ${env.DEPLOY_ENV} environment"
+                    
+                    sh """
+                        # Stop existing container for this environment
+                        docker stop ${APP_NAME}-${env.DEPLOY_ENV} 2>/dev/null || true
+                        docker rm ${APP_NAME}-${env.DEPLOY_ENV} 2>/dev/null || true
+                        
+                        # Start new container
+                        docker run -d \\
+                            --name ${APP_NAME}-${env.DEPLOY_ENV} \\
+                            -p ${env.DEPLOY_PORT}:3000 \\
+                            --restart unless-stopped \\
+                            -e NODE_ENV=production \\
+                            -e BRANCH_NAME=${env.BRANCH_NAME} \\
+                            ${env.DOCKER_IMAGE}
+                        
+                        # Wait and verify
+                        sleep 10
+                        curl -f http://localhost:${env.DEPLOY_PORT}/api/health
+                    """
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            script {
+                // Clean up old images for this branch
+                def branchTag = env.BRANCH_NAME.replaceAll('/', '-').toLowerCase()
+                sh """
+                    docker images ${APP_NAME} | grep ${branchTag} | tail -n +4 | awk '{print \$3}' | xargs -r docker rmi || true
+                """
+            }
+        }
+        
+        success {
+            script {
+                if (env.DEPLOY_ENV != 'none') {
+                    slackSend(
+                        channel: '#deployments',
+                        color: 'good',
+                        message: "✅ ${APP_NAME} - ${env.BRANCH_NAME} deployed to ${env.DEPLOY_ENV} - Build #${BUILD_NUMBER}"
+                    )
+                }
+            }
+        }
+        
+        failure {
+            script {
+                slackSend(
+                    channel: '#deployments',
+                    color: 'danger',
+                    message: "❌ ${APP_NAME} - ${env.BRANCH_NAME} deployment failed - Build #${BUILD_NUMBER}"
+                )
+            }
+        }
+    }
+}

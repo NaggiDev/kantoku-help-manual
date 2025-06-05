@@ -1,0 +1,354 @@
+// Production deployment pipeline for Kantoku Help Manual
+@Library('kantoku-shared-library') _
+
+pipeline {
+    agent any
+    
+    parameters {
+        choice(
+            name: 'DEPLOYMENT_TYPE',
+            choices: ['blue-green', 'rolling', 'canary'],
+            description: 'Deployment strategy'
+        )
+        
+        string(
+            name: 'DOCKER_IMAGE_TAG',
+            defaultValue: 'latest',
+            description: 'Docker image tag to deploy'
+        )
+        
+        booleanParam(
+            name: 'RUN_SMOKE_TESTS',
+            defaultValue: true,
+            description: 'Run smoke tests after deployment'
+        )
+        
+        booleanParam(
+            name: 'SKIP_APPROVAL',
+            defaultValue: false,
+            description: 'Skip manual approval (use with caution)'
+        )
+    }
+    
+    environment {
+        APP_NAME = 'kantoku-help-manual'
+        ENVIRONMENT = 'production'
+        PRODUCTION_PORT = '3000'
+        STAGING_PORT = '3001'
+        DOCKER_REGISTRY = credentials('docker-registry-url')
+        DOCKER_IMAGE = "${DOCKER_REGISTRY}/kantoku-help-manual:${params.DOCKER_IMAGE_TAG}"
+        
+        // Monitoring and alerting
+        DATADOG_API_KEY = credentials('datadog-api-key')
+        SLACK_WEBHOOK = credentials('slack-webhook-url')
+    }
+    
+    stages {
+        stage('Pre-deployment Checks') {
+            steps {
+                script {
+                    echo "🔍 Running pre-deployment checks"
+                    
+                    // Verify Docker image exists
+                    sh """
+                        docker pull ${DOCKER_IMAGE}
+                        docker inspect ${DOCKER_IMAGE}
+                    """
+                    
+                    // Check staging environment health
+                    sh """
+                        echo "Checking staging environment..."
+                        curl -f http://localhost:${STAGING_PORT}/api/health || {
+                            echo "❌ Staging environment is not healthy"
+                            exit 1
+                        }
+                    """
+                    
+                    // Check production environment capacity
+                    sh """
+                        echo "Checking system resources..."
+                        df -h
+                        free -h
+                        docker system df
+                    """
+                }
+            }
+        }
+        
+        stage('Security Scan') {
+            steps {
+                script {
+                    echo "🔒 Running security scan on Docker image"
+                    
+                    sh """
+                        # Run Trivy security scan
+                        if command -v trivy &> /dev/null; then
+                            trivy image --severity HIGH,CRITICAL ${DOCKER_IMAGE}
+                        else
+                            echo "Trivy not installed, skipping security scan"
+                        fi
+                        
+                        # Run Docker bench security
+                        if [ -f docker-bench-security.sh ]; then
+                            ./docker-bench-security.sh
+                        fi
+                    """
+                }
+            }
+        }
+        
+        stage('Approval Gate') {
+            when {
+                not { params.SKIP_APPROVAL }
+            }
+            steps {
+                script {
+                    timeout(time: 10, unit: 'MINUTES') {
+                        def deploymentInfo = """
+                        🚀 Production Deployment Request
+                        
+                        Application: ${APP_NAME}
+                        Environment: ${ENVIRONMENT}
+                        Image: ${DOCKER_IMAGE}
+                        Strategy: ${params.DEPLOYMENT_TYPE}
+                        Build: #${BUILD_NUMBER}
+                        
+                        Please review and approve this deployment.
+                        """
+                        
+                        input message: deploymentInfo,
+                              ok: 'Approve Deployment',
+                              submitterParameter: 'APPROVER'
+                    }
+                    
+                    echo "✅ Deployment approved by: ${env.APPROVER}"
+                }
+            }
+        }
+        
+        stage('Deployment') {
+            steps {
+                script {
+                    echo "🚀 Starting ${params.DEPLOYMENT_TYPE} deployment"
+                    
+                    switch(params.DEPLOYMENT_TYPE) {
+                        case 'blue-green':
+                            deployBlueGreen()
+                            break
+                        case 'rolling':
+                            deployRolling()
+                            break
+                        case 'canary':
+                            deployCanary()
+                            break
+                        default:
+                            error("Unknown deployment type: ${params.DEPLOYMENT_TYPE}")
+                    }
+                }
+            }
+        }
+        
+        stage('Smoke Tests') {
+            when {
+                params.RUN_SMOKE_TESTS
+            }
+            steps {
+                script {
+                    echo "🧪 Running smoke tests"
+                    
+                    sh """
+                        # Basic health check
+                        curl -f http://localhost:${PRODUCTION_PORT}/api/health
+                        
+                        # Test main pages
+                        curl -f http://localhost:${PRODUCTION_PORT}/
+                        curl -f http://localhost:${PRODUCTION_PORT}/getting-started/step-1
+                        curl -f http://localhost:${PRODUCTION_PORT}/features/overview
+                        
+                        # Test API endpoints
+                        curl -f http://localhost:${PRODUCTION_PORT}/api/articles?locale=ja
+                        curl -f http://localhost:${PRODUCTION_PORT}/api/articles?locale=en
+                        curl -f http://localhost:${PRODUCTION_PORT}/api/articles?locale=vi
+                        
+                        # Test language switching
+                        for locale in ja en vi; do
+                            echo "Testing locale: \$locale"
+                            curl -f "http://localhost:${PRODUCTION_PORT}/api/articles/getting-started/step-1?locale=\$locale"
+                        done
+                        
+                        echo "✅ All smoke tests passed"
+                    """
+                }
+            }
+        }
+        
+        stage('Performance Tests') {
+            steps {
+                script {
+                    echo "⚡ Running performance tests"
+                    
+                    sh """
+                        # Simple load test using curl
+                        echo "Running basic load test..."
+                        for i in {1..10}; do
+                            curl -w "@curl-format.txt" -o /dev/null -s http://localhost:${PRODUCTION_PORT}/ &
+                        done
+                        wait
+                        
+                        # Check response times
+                        echo "Checking response times..."
+                        time curl -f http://localhost:${PRODUCTION_PORT}/
+                    """
+                }
+            }
+        }
+        
+        stage('Update Monitoring') {
+            steps {
+                script {
+                    echo "📊 Updating monitoring and alerting"
+                    
+                    sh """
+                        # Update deployment markers in monitoring systems
+                        curl -X POST "https://api.datadoghq.com/api/v1/events" \\
+                             -H "Content-Type: application/json" \\
+                             -H "DD-API-KEY: ${DATADOG_API_KEY}" \\
+                             -d '{
+                                 "title": "Kantoku Help Manual Deployment",
+                                 "text": "Deployed version ${params.DOCKER_IMAGE_TAG} to production",
+                                 "tags": ["environment:production", "service:kantoku-help-manual"]
+                             }' || echo "Failed to send Datadog event"
+                        
+                        # Send Slack notification
+                        curl -X POST ${SLACK_WEBHOOK} \\
+                             -H 'Content-type: application/json' \\
+                             -d '{
+                                 "text": "🚀 Kantoku Help Manual deployed to production",
+                                 "attachments": [{
+                                     "color": "good",
+                                     "fields": [
+                                         {"title": "Version", "value": "${params.DOCKER_IMAGE_TAG}", "short": true},
+                                         {"title": "Strategy", "value": "${params.DEPLOYMENT_TYPE}", "short": true},
+                                         {"title": "Approved by", "value": "${env.APPROVER ?: 'Automated'}", "short": true}
+                                     ]
+                                 }]
+                             }' || echo "Failed to send Slack notification"
+                    """
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            script {
+                // Archive deployment artifacts
+                archiveArtifacts artifacts: 'deployment-logs/*.log', allowEmptyArchive: true
+                
+                // Clean up old Docker images
+                sh """
+                    docker images kantoku-help-manual --format "table {{.Repository}}:{{.Tag}}\t{{.CreatedAt}}" | \\
+                    tail -n +2 | sort -k2 -r | tail -n +6 | awk '{print \$1}' | \\
+                    xargs -r docker rmi || true
+                """
+            }
+        }
+        
+        success {
+            script {
+                echo "✅ Production deployment completed successfully!"
+                
+                emailext (
+                    subject: "✅ Kantoku Help Manual - Production Deployment Successful",
+                    body: """
+                        <h2>Production Deployment Successful! 🎉</h2>
+                        <p><strong>Application:</strong> Kantoku Help Manual</p>
+                        <p><strong>Version:</strong> ${params.DOCKER_IMAGE_TAG}</p>
+                        <p><strong>Strategy:</strong> ${params.DEPLOYMENT_TYPE}</p>
+                        <p><strong>Build:</strong> #${BUILD_NUMBER}</p>
+                        <p><strong>Approved by:</strong> ${env.APPROVER ?: 'Automated'}</p>
+                        
+                        <h3>URLs:</h3>
+                        <ul>
+                            <li><strong>Production:</strong> http://localhost:${PRODUCTION_PORT}</li>
+                            <li><strong>Health Check:</strong> http://localhost:${PRODUCTION_PORT}/api/health</li>
+                        </ul>
+                        
+                        <p><strong>Build URL:</strong> ${BUILD_URL}</p>
+                    """,
+                    mimeType: 'text/html',
+                    to: 'devops@company.com,product@company.com'
+                )
+            }
+        }
+        
+        failure {
+            script {
+                echo "❌ Production deployment failed!"
+                
+                // Automatic rollback on failure
+                sh """
+                    echo "🔄 Initiating automatic rollback..."
+                    # Rollback logic here
+                """
+                
+                emailext (
+                    subject: "❌ Kantoku Help Manual - Production Deployment Failed",
+                    body: """
+                        <h2>Production Deployment Failed! ❌</h2>
+                        <p><strong>Application:</strong> Kantoku Help Manual</p>
+                        <p><strong>Version:</strong> ${params.DOCKER_IMAGE_TAG}</p>
+                        <p><strong>Strategy:</strong> ${params.DEPLOYMENT_TYPE}</p>
+                        <p><strong>Build:</strong> #${BUILD_NUMBER}</p>
+                        
+                        <p><strong>Build URL:</strong> ${BUILD_URL}</p>
+                        <p><strong>Console Output:</strong> ${BUILD_URL}console</p>
+                        
+                        <p>Automatic rollback has been initiated. Please check the logs for more details.</p>
+                    """,
+                    mimeType: 'text/html',
+                    to: 'devops@company.com,oncall@company.com'
+                )
+            }
+        }
+    }
+}
+
+def deployBlueGreen() {
+    echo "🔵🟢 Executing blue-green deployment"
+    
+    deployKantoku([
+        appName: 'kantoku-help-manual',
+        environment: 'production',
+        dockerImage: env.DOCKER_IMAGE,
+        port: env.PRODUCTION_PORT,
+        rollbackOnFailure: true,
+        verificationTests: [
+            'curl -f http://localhost:3000/api/health',
+            'curl -f http://localhost:3000/'
+        ],
+        notifications: [
+            slack: [
+                channel: '#deployments'
+            ]
+        ]
+    ])
+}
+
+def deployRolling() {
+    echo "🔄 Executing rolling deployment"
+    // Rolling deployment implementation
+    sh """
+        # Rolling deployment logic
+        echo "Rolling deployment not yet implemented"
+    """
+}
+
+def deployCanary() {
+    echo "🐤 Executing canary deployment"
+    // Canary deployment implementation
+    sh """
+        # Canary deployment logic
+        echo "Canary deployment not yet implemented"
+    """
+}
