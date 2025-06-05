@@ -13,8 +13,15 @@ export default function Sidebar() {
   const { locale, t } = useLanguage();
   const [allArticles, setAllArticles] = useState<ArticleData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
     // Load articles based on current locale via API
     const fetchArticles = async () => {
       try {
@@ -34,7 +41,7 @@ export default function Sidebar() {
     };
 
     fetchArticles();
-  }, [locale]);
+  }, [locale, mounted]);
 
   const groupedArticles = allArticles.reduce<GroupedArticles>((acc, article) => {
     const category = article.category || 'General'; // Fallback for uncategorized articles

@@ -18,22 +18,29 @@ interface ArticleContentProps {
   initialCategoryArticles: ArticleData[];
 }
 
-export default function ArticleContent({ 
-  category, 
-  slug, 
-  initialArticle, 
-  initialCategoryArticles 
+export default function ArticleContent({
+  category,
+  slug,
+  initialArticle,
+  initialCategoryArticles
 }: ArticleContentProps) {
   const { locale } = useLanguage();
   const [article, setArticle] = useState<Article>(initialArticle);
   const [categoryArticles, setCategoryArticles] = useState<ArticleData[]>(initialCategoryArticles);
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
     const fetchLocalizedContent = async () => {
       try {
         setLoading(true);
-        
+
         // Fetch the article in the current locale
         const articleResponse = await fetch(`/api/articles/${category}/${slug}?locale=${locale}`);
         if (articleResponse.ok) {
@@ -57,7 +64,7 @@ export default function ArticleContent({
     };
 
     fetchLocalizedContent();
-  }, [locale, category, slug]);
+  }, [locale, category, slug, mounted]);
 
   return (
     <div className="max-w-4xl mx-auto">

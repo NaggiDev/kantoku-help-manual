@@ -25,29 +25,41 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>('ja');
-  const [isHydrated, setIsHydrated] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   // Load saved language preference on mount
   useEffect(() => {
-    setIsHydrated(true);
-    const savedLocale = localStorage.getItem('kantoku-locale') as Locale;
-    if (savedLocale && ['en', 'ja', 'vi'].includes(savedLocale)) {
-      setLocaleState(savedLocale);
-    } else {
-      // Detect browser language, default to Japanese
-      const browserLang = navigator.language.split('-')[0];
-      if (['en', 'vi'].includes(browserLang)) {
-        setLocaleState(browserLang as Locale);
-      } else {
-        // Default to Japanese for any other language
-        setLocaleState('ja');
+    setMounted(true);
+
+    const initializeLanguage = () => {
+      try {
+        const savedLocale = localStorage.getItem('kantoku-locale') as Locale;
+        if (savedLocale && ['en', 'ja', 'vi'].includes(savedLocale)) {
+          setLocaleState(savedLocale);
+        } else {
+          // Detect browser language, default to Japanese
+          const browserLang = navigator.language.split('-')[0];
+          if (['en', 'vi'].includes(browserLang)) {
+            setLocaleState(browserLang as Locale);
+          }
+          // If not en or vi, keep default 'ja'
+        }
+      } catch (error) {
+        // Fallback to Japanese if localStorage/navigator is not available
+        console.warn('Failed to initialize language preference:', error);
       }
-    }
+    };
+
+    initializeLanguage();
   }, []);
 
   const setLocale = (newLocale: Locale) => {
     setLocaleState(newLocale);
-    localStorage.setItem('kantoku-locale', newLocale);
+    try {
+      localStorage.setItem('kantoku-locale', newLocale);
+    } catch (error) {
+      console.warn('Failed to save language preference:', error);
+    }
   };
 
   // Translation function
@@ -110,7 +122,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <LanguageContext.Provider value={{ locale, setLocale, t }}>
-      {isHydrated ? children : <div style={{ visibility: 'hidden' }}>{children}</div>}
+      {children}
     </LanguageContext.Provider>
   );
 }
