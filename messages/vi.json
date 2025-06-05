@@ -1,0 +1,45 @@
+{
+  "navigation": {
+    "home": "Trang chủ",
+    "documentation": "Tài liệu",
+    "search": "Tìm kiếm tài liệu...",
+    "searchPlaceholder": "Tìm kiếm tài liệu... (sắp ra mắt)"
+  },
+  "homepage": {
+    "title": "Chào mừng đến với Hướng dẫn Sử dụng Kantoku",
+    "subtitle": "Hướng dẫn toàn diện để hiểu và sử dụng Kantoku. Tìm câu trả lời, học các tính năng mới và tận dụng tối đa nền tảng của chúng tôi.",
+    "gettingStarted": "Bắt đầu",
+    "gettingStartedDesc": "Mới với Kantoku? Bắt đầu hành trình của bạn với hướng dẫn từng bước.",
+    "features": "Tính năng",
+    "featuresDesc": "Khám phá các tính năng và khả năng mạnh mẽ mà Kantoku cung cấp.",
+    "advanced": "Nâng cao",
+    "advancedDesc": "Thành thạo các tính năng nâng cao như tự động hóa và tích hợp.",
+    "troubleshooting": "Khắc phục sự cố",
+    "troubleshootingDesc": "Tìm giải pháp cho các vấn đề thường gặp và mã lỗi.",
+    "statsGuides": "Hướng dẫn từng bước",
+    "statsCategories": "Danh mục chính",
+    "statsSupport": "Hỗ trợ có sẵn",
+    "browseText": "Duyệt tất cả bài viết bằng thanh bên trong",
+    "documentationSection": "phần tài liệu"
+  },
+  "article": {
+    "previous": "Trước",
+    "next": "Tiếp theo",
+    "step": "Bước",
+    "of": "của",
+    "progress": "Tiến độ",
+    "started": "Đã bắt đầu",
+    "complete": "Hoàn thành",
+    "finished": "Đã kết thúc"
+  },
+  "sidebar": {
+    "title": "Tài liệu",
+    "subtitle": "Điều hướng qua các hướng dẫn toàn diện của chúng tôi"
+  },
+  "categories": {
+    "getting-started": "Bắt đầu",
+    "features": "Tính năng",
+    "advanced": "Nâng cao",
+    "troubleshooting": "Khắc phục sự cố"
+  }
+}

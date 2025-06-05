@@ -1,0 +1,45 @@
+{
+  "navigation": {
+    "home": "Home",
+    "documentation": "Documentation",
+    "search": "Search documentation...",
+    "searchPlaceholder": "Search documentation... (coming soon)"
+  },
+  "homepage": {
+    "title": "Welcome to the Kantoku Help Manual",
+    "subtitle": "Your comprehensive guide to understanding and using Kantoku. Find answers, learn new features, and get the most out of our platform.",
+    "gettingStarted": "Getting Started",
+    "gettingStartedDesc": "New to Kantoku? Begin your journey with our step-by-step guide.",
+    "features": "Features",
+    "featuresDesc": "Discover the powerful features and capabilities Kantoku offers.",
+    "advanced": "Advanced",
+    "advancedDesc": "Master advanced features like automation and integrations.",
+    "troubleshooting": "Troubleshooting",
+    "troubleshootingDesc": "Find solutions to common issues and error codes.",
+    "statsGuides": "Step-by-step Guides",
+    "statsCategories": "Main Categories",
+    "statsSupport": "Available Support",
+    "browseText": "Browse all articles using the sidebar in our",
+    "documentationSection": "documentation section"
+  },
+  "article": {
+    "previous": "Previous",
+    "next": "Next",
+    "step": "Step",
+    "of": "of",
+    "progress": "Progress",
+    "started": "Started",
+    "complete": "Complete",
+    "finished": "Finished"
+  },
+  "sidebar": {
+    "title": "Documentation",
+    "subtitle": "Navigate through our comprehensive guides"
+  },
+  "categories": {
+    "getting-started": "Getting Started",
+    "features": "Features", 
+    "advanced": "Advanced",
+    "troubleshooting": "Troubleshooting"
+  }
+}

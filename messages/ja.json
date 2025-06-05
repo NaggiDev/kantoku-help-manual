@@ -1,0 +1,45 @@
+{
+  "navigation": {
+    "home": "ホーム",
+    "documentation": "ドキュメント",
+    "search": "ドキュメントを検索...",
+    "searchPlaceholder": "ドキュメントを検索...（近日公開）"
+  },
+  "homepage": {
+    "title": "Kantokuヘルプマニュアルへようこそ",
+    "subtitle": "Kantokuの理解と使用に関する包括的なガイドです。回答を見つけ、新機能を学び、プラットフォームを最大限に活用してください。",
+    "gettingStarted": "はじめに",
+    "gettingStartedDesc": "Kantokuが初めてですか？ステップバイステップガイドで始めましょう。",
+    "features": "機能",
+    "featuresDesc": "Kantokuが提供する強力な機能と能力を発見してください。",
+    "advanced": "上級者向け",
+    "advancedDesc": "自動化や統合などの高度な機能をマスターしてください。",
+    "troubleshooting": "トラブルシューティング",
+    "troubleshootingDesc": "よくある問題やエラーコードの解決策を見つけてください。",
+    "statsGuides": "ステップバイステップガイド",
+    "statsCategories": "メインカテゴリ",
+    "statsSupport": "利用可能なサポート",
+    "browseText": "サイドバーを使用してすべての記事を閲覧してください",
+    "documentationSection": "ドキュメントセクション"
+  },
+  "article": {
+    "previous": "前へ",
+    "next": "次へ",
+    "step": "ステップ",
+    "of": "/",
+    "progress": "進捗",
+    "started": "開始",
+    "complete": "完了",
+    "finished": "終了"
+  },
+  "sidebar": {
+    "title": "ドキュメント",
+    "subtitle": "包括的なガイドをナビゲートしてください"
+  },
+  "categories": {
+    "getting-started": "はじめに",
+    "features": "機能",
+    "advanced": "上級者向け",
+    "troubleshooting": "トラブルシューティング"
+  }
+}
