@@ -1,3 +1,20 @@
 @import "tailwindcss";
 
 /* You can add global styles to this file, and also import other style files */
+
+/* Dark theme language switcher for landing page */
+.language-switcher-dark button {
+  @apply bg-slate-800 border-slate-600 text-slate-200 hover:bg-slate-700;
+}
+
+.language-switcher-dark .absolute {
+  @apply bg-slate-800 border-slate-600;
+}
+
+.language-switcher-dark .absolute button {
+  @apply text-slate-200 hover:bg-slate-700;
+}
+
+.language-switcher-dark .absolute button.bg-blue-50 {
+  @apply bg-slate-700 text-blue-300;
+}

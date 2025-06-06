@@ -20,7 +20,9 @@
     "statsCategories": "Main Categories",
     "statsSupport": "Available Support",
     "browseText": "Browse all articles using the sidebar in our",
-    "documentationSection": "documentation section"
+    "documentationSection": "documentation section",
+    "webVersionDesc": "Discover the powerful web-based features and capabilities Kantoku offers.",
+    "appVersionDesc": "Master mobile app features for on-the-go access and management."
   },
   "article": {
     "previous": "Previous",
@@ -38,7 +40,9 @@
   },
   "categories": {
     "getting-started": "Getting Started",
-    "features": "Features", 
+    "web-version": "Web Version",
+    "app-version": "App Version",
+    "features": "Features",
     "advanced": "Advanced",
     "troubleshooting": "Troubleshooting"
   }

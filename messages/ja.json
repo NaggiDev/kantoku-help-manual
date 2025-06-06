@@ -20,7 +20,9 @@
     "statsCategories": "メインカテゴリ",
     "statsSupport": "利用可能なサポート",
     "browseText": "サイドバーを使用してすべての記事を閲覧してください",
-    "documentationSection": "ドキュメントセクション"
+    "documentationSection": "ドキュメントセクション",
+    "webVersionDesc": "Kantokuが提供する強力なWebベースの機能と能力を発見してください。",
+    "appVersionDesc": "外出先でのアクセスと管理のためのモバイルアプリ機能をマスターしてください。"
   },
   "article": {
     "previous": "前へ",
@@ -38,6 +40,8 @@
   },
   "categories": {
     "getting-started": "はじめに",
+    "web-version": "Webバージョン",
+    "app-version": "アプリバージョン",
     "features": "機能",
     "advanced": "上級者向け",
     "troubleshooting": "トラブルシューティング"

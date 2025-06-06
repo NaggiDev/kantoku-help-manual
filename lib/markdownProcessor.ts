@@ -40,7 +40,7 @@ export function getSortedArticlesData(locale: string = 'ja'): ArticleData[] {
   let allArticles: ArticleData[] = [];
 
   // Define category order for consistent sorting across languages
-  const categoryOrder = ['getting-started', 'features', 'advanced', 'troubleshooting'];
+  const categoryOrder = ['getting-started', 'web-version', 'app-version'];
 
   categories.forEach(category => {
     const categoryPath = path.join(targetDirectory, category);
@@ -131,13 +131,28 @@ export async function getArticleData(category: string, id: string, locale: strin
 }
 
 export function getAllArticleIds() {
-  const categories = fs.readdirSync(contentDirectory);
   let paths: Array<{ params: { category: string; slug: string } }> = [];
 
-  categories.forEach(category => {
-    const categoryPath = path.join(contentDirectory, category);
-    if (fs.statSync(categoryPath).isDirectory()) {
+  // Get all language directories
+  const languages = fs.readdirSync(contentDirectory).filter(item => {
+    const itemPath = path.join(contentDirectory, item);
+    return fs.statSync(itemPath).isDirectory();
+  });
+
+  // Process each language directory
+  languages.forEach(language => {
+    const languageDir = path.join(contentDirectory, language);
+
+    // Get all category directories within this language
+    const categories = fs.readdirSync(languageDir).filter(item => {
+      const itemPath = path.join(languageDir, item);
+      return fs.statSync(itemPath).isDirectory();
+    });
+
+    categories.forEach(category => {
+      const categoryPath = path.join(languageDir, category);
       const fileNames = fs.readdirSync(categoryPath).filter(fileName => fileName.endsWith('.md'));
+
       const categoryPaths = fileNames.map(fileName => {
         return {
           params: {
@@ -147,7 +162,8 @@ export function getAllArticleIds() {
         };
       });
       paths = paths.concat(categoryPaths);
-    }
+    });
   });
+
   return paths;
-} 
+}

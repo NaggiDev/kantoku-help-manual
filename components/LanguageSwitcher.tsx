@@ -39,7 +39,7 @@ export default function LanguageSwitcher() {
             {languages.map((language) => (
               <button
                 key={language.code}
-                onClick={() => switchLanguage(language.code)}
+                onClick={() => switchLanguage(language.code as 'en' | 'ja' | 'vi')}
                 className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center space-x-3 ${
                   language.code === locale ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
                 }`}

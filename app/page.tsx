@@ -2,12 +2,20 @@
 
 import Link from 'next/link';
 import { useLanguage } from '@/contexts/LanguageContext';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export default function Home() {
   const { t } = useLanguage();
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-12 md:p-24 bg-gradient-to-br from-slate-900 to-slate-800 text-white">
+    <main className="flex min-h-screen flex-col items-center justify-center p-12 md:p-24 bg-gradient-to-br from-slate-900 to-slate-800 text-white relative">
+      {/* Language Switcher */}
+      <div className="absolute top-6 right-6 z-10">
+        <div className="language-switcher-dark">
+          <LanguageSwitcher />
+        </div>
+      </div>
+
       <div className="text-center max-w-2xl">
         <h1 className="text-5xl md:text-6xl font-bold mb-6">
           {t('title', 'homepage')}
@@ -27,7 +35,7 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Link href="/getting-started/step-1" className="block bg-slate-700 hover:bg-slate-600 p-6 rounded-lg transition-colors shadow-md group">
+          <Link href="/getting-started/introduction" className="block bg-slate-700 hover:bg-slate-600 p-6 rounded-lg transition-colors shadow-md group">
             <div className="flex items-center mb-3">
               <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mr-3">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -39,19 +47,19 @@ export default function Home() {
             <p className="text-slate-300">{t('gettingStartedDesc', 'homepage')}</p>
           </Link>
           
-          <Link href="/features/overview" className="block bg-slate-700 hover:bg-slate-600 p-6 rounded-lg transition-colors shadow-md group">
+          <Link href="/web-version/01-login" className="block bg-slate-700 hover:bg-slate-600 p-6 rounded-lg transition-colors shadow-md group">
             <div className="flex items-center mb-3">
               <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center mr-3">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold">{t('features', 'homepage')}</h3>
+              <h3 className="text-xl font-semibold">{t('web-version', 'categories')}</h3>
             </div>
-            <p className="text-slate-300">{t('featuresDesc', 'homepage')}</p>
+            <p className="text-slate-300">{t('webVersionDesc', 'homepage')}</p>
           </Link>
 
-          <Link href="/advanced/automation" className="block bg-slate-700 hover:bg-slate-600 p-6 rounded-lg transition-colors shadow-md group">
+          <Link href="/app-version/01-personal-dashboard" className="block bg-slate-700 hover:bg-slate-600 p-6 rounded-lg transition-colors shadow-md group">
             <div className="flex items-center mb-3">
               <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mr-3">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -59,21 +67,9 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold">{t('advanced', 'homepage')}</h3>
+              <h3 className="text-xl font-semibold">{t('app-version', 'categories')}</h3>
             </div>
-            <p className="text-slate-300">{t('advancedDesc', 'homepage')}</p>
-          </Link>
-
-          <Link href="/troubleshooting/common-issues" className="block bg-slate-700 hover:bg-slate-600 p-6 rounded-lg transition-colors shadow-md group">
-            <div className="flex items-center mb-3">
-              <div className="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center mr-3">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.25a9.75 9.75 0 109.75 9.75A9.75 9.75 0 0012 2.25z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold">{t('troubleshooting', 'homepage')}</h3>
-            </div>
-            <p className="text-slate-300">{t('troubleshootingDesc', 'homepage')}</p>
+            <p className="text-slate-300">{t('appVersionDesc', 'homepage')}</p>
           </Link>
         </div>
 
@@ -84,7 +80,7 @@ export default function Home() {
             <div className="text-slate-300">{t('statsGuides', 'homepage')}</div>
           </div>
           <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-700">
-            <div className="text-3xl font-bold text-green-400 mb-2">4</div>
+            <div className="text-3xl font-bold text-green-400 mb-2">3</div>
             <div className="text-slate-300">{t('statsCategories', 'homepage')}</div>
           </div>
           <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-700">
@@ -92,10 +88,6 @@ export default function Home() {
             <div className="text-slate-300">{t('statsSupport', 'homepage')}</div>
           </div>
         </div>
-
-        <p className="mt-12 text-sm text-slate-400">
-          {t('browseText', 'homepage')} <Link href="/getting-started/step-1" className="underline hover:text-blue-400">{t('documentationSection', 'homepage')}</Link>.
-        </p>
       </div>
     </main>
   );

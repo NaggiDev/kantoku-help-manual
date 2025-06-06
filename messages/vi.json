@@ -20,7 +20,9 @@
     "statsCategories": "Danh mục chính",
     "statsSupport": "Hỗ trợ có sẵn",
     "browseText": "Duyệt tất cả bài viết bằng thanh bên trong",
-    "documentationSection": "phần tài liệu"
+    "documentationSection": "phần tài liệu",
+    "webVersionDesc": "Khám phá các tính năng và khả năng mạnh mẽ dựa trên web mà Kantoku cung cấp.",
+    "appVersionDesc": "Thành thạo các tính năng ứng dụng di động để truy cập và quản lý khi di chuyển."
   },
   "article": {
     "previous": "Trước",
@@ -38,6 +40,8 @@
   },
   "categories": {
     "getting-started": "Bắt đầu",
+    "web-version": "Phiên bản Web",
+    "app-version": "Phiên bản Ứng dụng",
     "features": "Tính năng",
     "advanced": "Nâng cao",
     "troubleshooting": "Khắc phục sự cố"

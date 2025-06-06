@@ -1,11 +1,18 @@
 ---
-title: Introduction
-description: Welcome to the Kantoku Help Manual.
+title: Get Started
+description: Getting started with Kantoku - your comprehensive guide to begin using the platform.
 order: 0
 ---
 
-# Welcome!
+# Get Started with Kantoku
 
-This is the main introduction to the Kantoku Help Manual.
+Welcome to Kantoku! This guide will help you get started with our comprehensive project management and attendance tracking platform.
 
-We are excited to have you here.
+![Get Started](/guide-books/get-started.jpg)
+
+Kantoku offers both web and mobile app versions to meet your needs. Choose the version that works best for your workflow:
+
+- **Web Version**: Full-featured desktop experience with comprehensive management tools
+- **App Version**: Mobile-optimized interface for on-the-go access
+
+Follow the guides below to learn how to use each version effectively.
