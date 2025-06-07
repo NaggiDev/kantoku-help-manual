@@ -45,5 +45,20 @@
     "features": "Tính năng",
     "advanced": "Nâng cao",
     "troubleshooting": "Khắc phục sự cố"
+  },
+  "download": {
+    "title": "Tải xuống Ứng dụng Kantoku",
+    "subtitle": "Nhận phiên bản mới nhất của Kantoku cho Android",
+    "downloadButton": "Tải xuống",
+    "showVersions": "Hiển thị Phiên bản Có sẵn",
+    "hideVersions": "Ẩn Phiên bản",
+    "availableVersions": "Phiên bản Có sẵn",
+    "version": "Phiên bản",
+    "releaseDate": "Ngày Phát hành",
+    "fileSize": "Kích thước Tệp",
+    "downloadLink": "Tải xuống APK",
+    "latest": "Mới nhất",
+    "beta": "Beta",
+    "stable": "Ổn định"
   }
 }

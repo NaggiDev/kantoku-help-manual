@@ -45,5 +45,20 @@
     "features": "Features",
     "advanced": "Advanced",
     "troubleshooting": "Troubleshooting"
+  },
+  "download": {
+    "title": "Download Kantoku App",
+    "subtitle": "Get the latest version of Kantoku for Android",
+    "downloadButton": "Download",
+    "showVersions": "Show Available Versions",
+    "hideVersions": "Hide Versions",
+    "availableVersions": "Available Versions",
+    "version": "Version",
+    "releaseDate": "Release Date",
+    "fileSize": "File Size",
+    "downloadLink": "Download APK",
+    "latest": "Latest",
+    "beta": "Beta",
+    "stable": "Stable"
   }
 }

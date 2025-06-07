@@ -45,5 +45,20 @@
     "features": "機能",
     "advanced": "上級者向け",
     "troubleshooting": "トラブルシューティング"
+  },
+  "download": {
+    "title": "Kantokuアプリをダウンロード",
+    "subtitle": "Android用Kantokuの最新バージョンを入手",
+    "downloadButton": "ダウンロード",
+    "showVersions": "利用可能なバージョンを表示",
+    "hideVersions": "バージョンを非表示",
+    "availableVersions": "利用可能なバージョン",
+    "version": "バージョン",
+    "releaseDate": "リリース日",
+    "fileSize": "ファイルサイズ",
+    "downloadLink": "APKをダウンロード",
+    "latest": "最新",
+    "beta": "ベータ",
+    "stable": "安定版"
   }
 }
